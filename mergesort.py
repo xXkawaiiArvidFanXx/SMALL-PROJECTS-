@@ -11,7 +11,7 @@ def mergesort():
         
 
     def merge(arr, counter):
-        print("nu mergear vi")
+  
         if len(arr) > 1:
             mid = len(arr)//2
             L = arr[:mid]
@@ -23,7 +23,7 @@ def mergesort():
             i = j = k = 0
 
             while i < len(L) and j < len(R):
-                print("håll i hatten")
+
                 counter += 1
                 if L[i] < R[j]:
                     arr[k] = L[i]
@@ -34,13 +34,13 @@ def mergesort():
                 k += 1
 
             while i < len(L):
-                print("nu jobbar vi hårt")
+
                 arr[k] = L[i]
                 i += 1
                 k += 1
 
             while j < len(R):
-                print("nu går det framåt")
+
                 arr[k] = R[j]
                 j += 1
                 k += 1
