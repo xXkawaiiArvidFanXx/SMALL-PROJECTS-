@@ -1,6 +1,6 @@
 def mergesort():
-    number  = 250000
-    max_val = 250000
+    number  = 25000000
+    max_val = 25000000
     # number=int(input("hur många tal"))
     # max_val=int(input("Hur högt ska talen gå"))
     import random
