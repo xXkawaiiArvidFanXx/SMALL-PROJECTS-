@@ -1,7 +1,10 @@
+from calculater_does_some_sounds import *
 import math
 import os
 import time
 import sys as sys
+import ast
+import operator as op
 print("我哋幾時會收到作業")
 print("官員我點樣攞個漢堡包")
 print("我什么时候能收到任务们")
@@ -11,12 +14,36 @@ def clear_terminal():
     else:
         os.system('clear')
 
+
+
+
+operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
+             ast.Div: op.truediv, ast.Pow: op.pow, ast.USub: op.neg}
+
+def evaluate(node):
+    try:
+        if isinstance(node, ast.Constant): # Om det är ett nummer
+            return node.value
+        elif isinstance(node, ast.BinOp): # Om det är en operation (+, -, *, /)
+            return operators[type(node.op)](evaluate(node.left), evaluate(node.right))
+        elif isinstance(node, ast.UnaryOp): # För negativa tal typ -5
+            return operators[type(node.op)](evaluate(node.operand))
+        else:
+            raise TypeError(node)
+    except (SyntaxError, ValueError, TypeError) as e:
+                print(f"FEL!!!!!!!!!: {e}")
+                typo()
+                time.sleep(5)
+                clear_terminal()
+
+def calc(expr):
+    return evaluate(ast.parse(expr, mode='eval').body)
+
+
 def typo():
         """Till när någon skriver fel"""
+        sound("toe_shoes_3 (calculater!)\MISINPUT.mp3")
         print("""
-▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
-▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
-▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░▒▒▒▒▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▒▒░░░░░░░░░░░░░░▒▒▒▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▒▓▓▓▓▓▓▓▒░░░░░░░░░░░░░░░░░░▒▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
@@ -59,36 +86,13 @@ def typo():
 ▓▓▓▓▓▓░░░░▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░▒▒▓░░░░▒▒░░░░░░░░░░░░░░░░░░▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ▓▓▓▓▓▒░░▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░▒▒▒░▒▒░░░░▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ▓▓▓▓▒░▒░▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░▒▒▒▒▒▒▒██▒░░░░▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▓▓▓▓▒░░░▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░▒▒▒░░▒▒▒▒▒▒▓▓▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▓▓▓▒░░░░▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░▒░░░▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 """)
 
 
 
 history = []
-svar=0
-# --- Funktioner för beräkningar ---
-def add(x, y):
-    return x + y
 
-def subtract(x, y):
-    return x - y
 
-def multiply(x, y):
-    return x * y
-
-def divide(x, y):
-    if y == 0:
-        return "Fel! Division med noll.\n GÖR OM GÖR RÄTT"
-    return x / y
 
 
 # --- Huvudprogram ---
@@ -98,15 +102,12 @@ def kalkylator():
 
     while True:
         clear_terminal()
+        backgroundmusic("toe_shoes_3 (calculater!)\MUSIC.mp3")
         # Ta emot användarinmatning för det är typ koolt
         # time.sleep(5)
         print("Välj operation:")
         print("-" * 20)
-        print("1. Addition (+)")
-        print("2. Subtraktion (-)")
-        print("3. Multiplikation (*)")
-        print("4. Division (/)")
-        print("5. Exponenter (^)")
+        print("1. Teckentolkande calculette")
         print("-" * 20)
         print("Du kan använda ans för senaste svaret")
         print("-" * 20)
@@ -124,68 +125,36 @@ def kalkylator():
             break
 
         # Kontrollera om valet är giltigt
-        if val in ('1', '2', '3', '4', '5'):
+        if val in ("1"):
             try:
-            
-            
-                num1_input = input("Ange första numret: ")
-                num2_input = input("Ange andra numret: ")
-                def parse_input(inp):
-                        inp = inp.strip()
-                        if inp.lower().startswith('ans'):
-                                if not history:
-                                    raise ValueError("Inga tidigare svar")
-                                suffix = inp[3:].strip()
-                                if suffix == "":
-                                    return history[-1]
-                                try:
-                                    index = int(suffix)
-                                except ValueError:
-                                    raise ValueError("Ogiltigt format för ans")
-                                if index < 0 or index >= len(history):
-                                    raise ValueError("Index utanför range")
-                                return history[index]
-                        return float(inp)
-                num1 = parse_input(num1_input)
-                num2 = parse_input(num2_input)
-            except ValueError as e:
+                expr = input("Ange ett matematiskt uttryck: ")
+                resultat = calc(expr)
+                print(f"Resultat: {expr} = {resultat}")
+                stopmusic()
+                sound("toe_shoes_3 (calculater!)\GANSWER.mp3")
+                history.append(resultat)
+                print("-" * 20) 
+                print(history)
+                print("-" * 20)
+                print("Återvänder till huvudmenyn om 5 zeptosekunder")
+                time.sleep(5)
+                clear_terminal()
+                typo()
+                time.sleep(0.5)
+                clear_terminal()
+            except (SyntaxError, ValueError, TypeError) as e:
                 print(f"FEL!!!!!!!!!: {e}")
                 typo()
-                continue
-
-            if val == '1':
-                resultat = add(num1, num2)
-                print(f"Resultat: {num1} + {num2} = {resultat}")
-            elif val == '2':
-                resultat = subtract(num1, num2)
-                print(f"Resultat: {num1} - {num2} = {resultat}")
-            elif val == '3':
-                resultat = multiply(num1, num2)
-                print(f"Resultat: {num1} * {num2} = {resultat}")
-            elif val == '4':
-                resultat = divide(num1, num2)
-                if isinstance(resultat, str):
-                    print(f"Resultat: {resultat}")
-                    typo()
-                    continue
-                print(f"Resultat: {num1} / {num2} = {resultat}")
-            elif val == '5':
-                resultat = math.pow(num1, num2)
-                print(f"Resultat: {num1} ** {num2} = {resultat}")
-            # HÄR LÄGGER VI TILL HISTORIA I VÄRLDN
-            history.append(resultat)
-            print("-" * 20) # Separator för tydlighet
-            print(history) # jag visar historiken yaoi och yuri
-            print("-" * 20)
-            print("Återvänder till huvudmenyn om 5 sekunder")
+                time.sleep(5)
+                clear_terminal()
+            continue
+        else:
+            clear_terminal()
+            typo()
             time.sleep(5)
             clear_terminal()
-            typo()
-            time.sleep(0.5)
-            clear_terminal()
-        else:
-            typo()
             print("Ogiltigt val, försök igen.")
+            time.sleep(2)
 
 # Kör kalkylatorn
 if __name__ == "__main__":
