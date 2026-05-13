@@ -1,4 +1,5 @@
 from calculater_does_some_sounds import *
+from desmos_got_none_on_this import *
 import math
 import os
 import time
@@ -109,6 +110,8 @@ def kalkylator():
         print("-" * 20)
         print("1. Teckentolkande calculette")
         print("-" * 20)
+        print("2. 3 Dimensionell grafritare (knasig)")
+        print("-" * 20)
         print("Du kan använda ans för senaste svaret")
         print("-" * 20)
         print("q. Om du vill avsluta kalkylatorn")
@@ -148,6 +151,9 @@ def kalkylator():
                 time.sleep(5)
                 clear_terminal()
             continue
+        elif val in ("2"):
+             chipset()
+             
         else:
             clear_terminal()
             typo()
