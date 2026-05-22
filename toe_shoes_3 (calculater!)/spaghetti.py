@@ -250,6 +250,132 @@ def typo():
 """)
 history = []
 
+# --- Interaktiv Kalkylator (SMASKIG!) ---
+def interactive_calculator():
+    """Den smaskiga och interaktiva kalkylatorn!"""
+    calc = VariableCalculator()
+    
+    while True:
+        clear_terminal()
+        
+        print("INTERAKTIV VARIABELTOLK")
+        
+        # Visa nuvarande variabler
+        print("NUVARANDE VARIABLER:")
+        user_vars = {k: v for k, v in calc.variables.items() if k not in ['pi', 'e', 'ans']}
+        if user_vars:
+            for var, val in user_vars.items():
+                print(f"   • {var:12} = {val}")
+        else:
+            print("   (Ingen användarvariabler ännu)")
+        print()
+        
+        # Visa senaste resultat
+        if calc.history:
+            print("SENASTE RESULTAT:")
+            for entry in calc.history[-3:]:
+                print(f"   ✓ {entry}")
+        else:
+            print("SENASTE RESULTAT: (Ingen beräkningar än)")
+        print()
+        
+        # Kommandomenyn
+        print("━" * 60)
+        print("KOMMANDON:")
+        print("   [beräkning]  - Skriv en matematisk beräkning")
+        print("   [var=värde]  - Definiera en variabel")
+        print("   'help'       - Visa hjälp")
+        print("   'vars'       - Visa alla variabler")
+        print("   'history'    - Visa full historik")
+        print("   'clear'      - Rensa historik")
+        print("   'demo'       - Se demonstrationskod")
+        print("   'quit'       - Avsluta kalkylatorn")
+        print("━" * 60)
+        print()
+        
+        # Ta emot inmatning
+        user_input = input("Vad vill du beräkna?").strip()
+        
+        # Kontrollera speciella kommandon
+        if user_input.lower() == 'quit':
+            print("\n Vi ses senare, du smaskiga matematiker!")
+            time.sleep(1)
+            break
+        
+        elif user_input.lower() == 'help':
+            print("""
+╔═══════════════════════════════════════════════════════════╗
+║ OPERATÖRER OCH FUNKTIONER FRÅN SODEXO KITCHEN             ║
+╠═══════════════════════════════════════════════════════════╣
+║ +, -, *, / (addition, subtraktion, multiplikation, div)   ║
+║ **           (exponenter, t.ex. 2**3 = 8)                 ║
+║ %            (modulo, t.ex. 10 % 3 = 1)                   ║
+║ //           (heltalsdivision)                            ║
+║                                                           ║
+║ FUNKTIONER:                                               ║
+║ sqrt(x)   - Kvadratrot      ln(x)   - Naturlig logaritm   ║
+║ sin(x)    - Sinus           log(x)  - 10-logaritm         ║
+║ cos(x)    - Cosinus         exp(x)  - e upphöjt till x    ║
+║ tan(x)    - Tangens         abs(x)  - Absolutvärde        ║
+║                                                           ║
+║ KONSTANTER: pi, e, ans (senaste resultat)                 ║
+║                                                           ║
+║ EXEMPEL:                                                  ║
+║ • 2 + 2 * 3                                               ║
+║ • sqrt(16)                                                ║
+║ • x = 5                                                   ║
+║ • x ** 2 + 10                                             ║
+║ • sin(pi/2)                                               ║
+╚═══════════════════════════════════════════════════════════╝
+            """)
+            input("Tryck Enter för att fortsätta...")
+        
+        elif user_input.lower() == 'vars':
+            calc.show_variables()
+            input("\nTryck Enter för att fortsätta...")
+        
+        elif user_input.lower() == 'history':
+            calc.show_history()
+            input("\nTryck Enter för att fortsätta...")
+        
+        elif user_input.lower() == 'clear':
+            calc.history = []
+            print("Historiken är rensad!")
+            time.sleep(1)
+        
+        elif user_input.lower() == 'demo':
+            demo()
+            input("\nTryck Enter för att fortsätta...")
+        
+        elif user_input == '':
+            typo()
+            time.sleep(10)
+        
+        else:
+            # Försök beräkna uttrycket
+            try:
+                result = calc.parse_and_calculate(user_input)
+                print()
+                
+                print(f" RESULTAT: {str(result):^34}")
+                
+                print()
+                print(f" Sparat i 'ans' = {result}")
+            except ValueError as e:
+                typo()
+                print(f" VÄRDEFEL: {e}")
+            except SyntaxError as e:
+                typo()
+                print(f" SYNTAXFEL: {e}")
+            except ZeroDivisionError as e:
+                typo()
+                print(f" DELNINGSFEL: {e}")
+            except Exception as e:
+                typo()
+                print(f" FEL: {e}")
+            
+            input("\nTryck Enter för att fortsätta...")
+
 # --- Huvudprogram ---
 def kalkylator():
 
@@ -285,7 +411,7 @@ def kalkylator():
 
         # Kontrollera om valet är giltigt
         if val in ("1"):
-            VariableCalculator()
+            interactive_calculator()
             
 
         elif val in ("2"):
