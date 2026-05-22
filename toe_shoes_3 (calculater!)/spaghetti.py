@@ -15,31 +15,191 @@ def clear_terminal():
     else:
         os.system('clear')
 
+# Operatörer som stöds
+operators = {
+    ast.Add: op.add, 
+    ast.Sub: op.sub, 
+    ast.Mult: op.mul,
+    ast.Div: op.truediv, 
+    ast.Pow: op.pow, 
+    ast.USub: op.neg,
+    ast.Mod: op.mod,
+    ast.FloorDiv: op.floordiv
+}
+
+# Funktioner som stöds
+functions = {
+    'sqrt': math.sqrt,
+    'sin': math.sin,
+    'cos': math.cos,
+    'tan': math.tan,
+    'abs': abs,
+    'log': math.log10,
+    'ln': math.log,
+    'exp': math.exp
+}
 
 
-
-operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
-             ast.Div: op.truediv, ast.Pow: op.pow, ast.USub: op.neg}
-
-def evaluate(node):
-    try:
-        if isinstance(node, ast.Constant): # Om det är ett nummer
+class VariableCalculator:
+    """En kalkulator som stöder variabler"""
+    
+    def __init__(self):
+        self.variables = {'ans': 0, 'pi': math.pi, 'e': math.e}
+        self.history = []
+    
+    def evaluate(self, node, variables):
+        """Evaluera en AST-nod rekursivt"""
+        
+        # Konstanter (tal)
+        if isinstance(node, ast.Constant):
             return node.value
-        elif isinstance(node, ast.BinOp): # Om det är en operation (+, -, *, /)
-            return operators[type(node.op)](evaluate(node.left), evaluate(node.right))
-        elif isinstance(node, ast.UnaryOp): # För negativa tal typ -5
-            return operators[type(node.op)](evaluate(node.operand))
+        
+        # Variabler
+        elif isinstance(node, ast.Name):
+            if node.id in variables:
+                return variables[node.id]
+            else:
+                raise ValueError(f"Okänd variabel: {node.id}")
+        
+
+        elif isinstance(node, ast.BinOp):
+            left = self.evaluate(node.left, variables)
+            right = self.evaluate(node.right, variables)
+            return operators[type(node.op)](left, right)
+        
+     
+        elif isinstance(node, ast.UnaryOp):
+            operand = self.evaluate(node.operand, variables)
+            return operators[type(node.op)](operand)
+        
+        # Funktionsanrop
+        elif isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                func_name = node.func.id
+                if func_name in functions:
+                    args = [self.evaluate(arg, variables) for arg in node.args]
+                    return functions[func_name](*args)
+                else:
+                    raise ValueError(f"Okänd funktion: {func_name}")
+        
         else:
-            raise TypeError(node)
-    except (SyntaxError, ValueError, TypeError) as e:
-                print(f"FEL!!!!!!!!!: {e}")
-                typo()
-                time.sleep(5)
-                clear_terminal()
+            raise TypeError(f"Stöds ej: {type(node)}")
+    
+    def parse_and_calculate(self, expression):
+        """
+        Parsera och beräkna ett uttryck.
+        Stöder:
+        - Vanlig matematik: 2 + 3 * 4
+        - Variabler: x + 5 (om x är definierad)
+        - Funktioner: sqrt(16), sin(pi/2)
+        - Exponenter: 2**3
+        """
+        try:
+            # Kontrollera om det är variabeltilldelning (x = 5)
+            if '=' in expression and not any(op in expression for op in ['==', '!=', '<=', '>=']):
+                parts = expression.split('=', 1)
+                if len(parts) == 2:
+                    var_name = parts[0].strip()
+                    if var_name.isidentifier():  # Kolla om det är ett giltigt variabelnamn
+                        value = self.parse_and_calculate(parts[1].strip())
+                        self.variables[var_name] = value
+                        return f"Variabeln {var_name} = {value}"
+            
+            # Parse och evaluera uttrycket
+            ast_tree = ast.parse(expression, mode='eval')
+            result = self.evaluate(ast_tree.body, self.variables)
+            
+            # Uppdatera 'ans' med senaste resultat
+            self.variables['ans'] = result
+            self.history.append(f"{expression} = {result}")
+            
+            return result
+        
+        except ValueError as e:
+            raise ValueError(str(e))
+        except SyntaxError:
+            raise SyntaxError(f"Syntax fel i uttrycket: {expression}")
+        except ZeroDivisionError:
+            raise ZeroDivisionError("Division med noll är inte tillåtet")
+        except Exception as e:
+            raise Exception(f"Fel: {e}")
+    
+    def show_variables(self):
+        """Visa alla definierade variabler"""
+        print("\n--- Definierade variabler ---")
+        for var, value in self.variables.items():
+            if var not in ['pi', 'e']:  # Dölj konstanter för klarhet
+                print(f"  {var} = {value}")
+        if len([v for v in self.variables if v not in ['pi', 'e', 'ans']]) == 0:
+            print("  (Ingen användardefinierade variabler ännu)")
+    
+    def show_history(self):
+        """Visa beräkningshistorik"""
+        print("\n--- Beräkningshistorik ---")
+        if not self.history:
+            print("  (Ingen historik ännu)")
+        else:
+            for i, entry in enumerate(self.history[-10:], 1):  # Visa senaste 10
+                print(f"  {i}. {entry}")
 
-def calc(expr):
-    return evaluate(ast.parse(expr, mode='eval').body)
 
+def demo():
+    """Demonstrera kalkulatorn"""
+    calc = VariableCalculator()
+    
+    print("=" * 20)
+    print("VARIABELTOLKANDE KALKULATOR - DEMO")
+    print("=" * 20)
+    
+    # Demo 1: Enkla beräkningar
+    print("\n1. Enkla beräkningar:")
+    expressions = [
+        "2 + 3",
+        "10 * 5",
+        "2**3",
+        "sqrt(16)",
+        "sin(0)"
+    ]
+    for expr in expressions:
+        try:
+            result = calc.parse_and_calculate(expr)
+            print(f"  {expr} = {result}")
+        except Exception as e:
+            print(f"  FEL: {e}")
+    
+    # Demo 2: Variabler
+    print("\n2. Variabeltilldelning:")
+    var_assignments = [
+        "x = 5",
+        "y = 3",
+        "z = x + y"
+    ]
+    for expr in var_assignments:
+        try:
+            result = calc.parse_and_calculate(expr)
+            print(f"  {expr} -> {result}")
+        except Exception as e:
+            print(f"  FEL: {e}")
+    
+    # Demo 3: Använda variabler
+    print("\n3. Använd variabler i beräkningar:")
+    calc_with_vars = [
+        "x * 2 + y",
+        "z ** 2",
+        "ans + 10"
+    ]
+    for expr in calc_with_vars:
+        try:
+            result = calc.parse_and_calculate(expr)
+            print(f"  {expr} = {result}")
+        except Exception as e:
+            print(f"  FEL: {e}")
+    
+    # Visa status
+    calc.show_variables()
+    calc.show_history()
+    
+    print("\n" + "=" * 50)
 
 def typo():
         """Till när någon skriver fel"""
@@ -88,18 +248,10 @@ def typo():
 ▓▓▓▓▓▒░░▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░▒▒▒░▒▒░░░░▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ▓▓▓▓▒░▒░▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░▒▒▒▒▒▒▒██▒░░░░▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 """)
-
-
-
 history = []
-
-
-
 
 # --- Huvudprogram ---
 def kalkylator():
-
-
 
     while True:
         clear_terminal()
@@ -108,9 +260,13 @@ def kalkylator():
         # time.sleep(5)
         print("Välj operation:")
         print("-" * 20)
-        print("1. Teckentolkande calculette")
+        print("1. Teckentolkande + Variabeltolkande calculette")
         print("-" * 20)
-        print("2. 3 Dimensionell grafritare (knasig)")
+        print("2. Grafritande Verktyg")
+        print("-" * 20)
+        print("3. 3 Dimensionell grafritare (REKOMMENDERAR INTE)")
+        print("-" * 20)
+        print("4. Se Demo för Variabeltolk")
         print("-" * 20)
         print("Du kan använda ans för senaste svaret")
         print("-" * 20)
@@ -129,30 +285,17 @@ def kalkylator():
 
         # Kontrollera om valet är giltigt
         if val in ("1"):
-            try:
-                expr = input("Ange ett matematiskt uttryck: ")
-                resultat = calc(expr)
-                print(f"Resultat: {expr} = {resultat}")
-                stopmusic()
-                sound("toe_shoes_3 (calculater!)\GANSWER.mp3")
-                history.append(resultat)
-                print("-" * 20) 
-                print(history)
-                print("-" * 20)
-                print("Återvänder till huvudmenyn om 5 zeptosekunder")
-                time.sleep(5)
-                clear_terminal()
-                typo()
-                time.sleep(0.5)
-                clear_terminal()
-            except (SyntaxError, ValueError, TypeError) as e:
-                print(f"FEL!!!!!!!!!: {e}")
-                typo()
-                time.sleep(5)
-                clear_terminal()
-            continue
+            VariableCalculator()
+            
+
         elif val in ("2"):
+             typo()
+             time.sleep(2)
+             clear_terminal()
+        elif val in ("3"):
              chipset()
+        elif val in ("4"):
+            demo()
              
         else:
             clear_terminal()
